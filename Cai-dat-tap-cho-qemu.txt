@@ -1,0 +1,32 @@
+Chuẩn bị:
++) cài đặt QEMU
++) Download kernel unix 2.6 and image HDD: 
+link: https://people.debian.org/~aurel32/qemu/
+
+Bước 1: Cấu hình network interface
+sudo gedit /etc/network/interfaces
+
++)Chỉnh file interfaces theo nội dung sau:
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+auto br0
+iface br0 inet dhcp
+ bridge_ports eth0
+ bridge_maxwait 0
+
++)Lưu file sau khi thay đổi.
+
+Bước 2: cài đặt Bridge Networking
++) chạy script sau: (thay hostname bằng tên tài đang sử dụng)
+#!/bin/bash
+sudo apt-get install uml-utilities bridge-utils
+groupadd -r tuntap
+usermod -a -G tuntap hostname
+sudo ifdown eth0
+sudo ifup br0
+/etc/init.d/networking restart
+sudo qemu-system-mips -M malta -kernel vmlinux-2.6.32-5-4kc-malta -hda debian_squeeze_mips_standard.qcow2 -append "root=/dev/sda1 console=tty0" -net nic -net tap
+
+
